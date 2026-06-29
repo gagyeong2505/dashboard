@@ -19,14 +19,23 @@ import { formatFileSize, formatDate } from '../../utils/file-utils';
  * <FileCard file={fileObj} onDelete={handleDelete} />
  */
 function FileCard({ file, onDelete }) {
-  const handleDownload = () => {
-    const link = document.createElement('a');
-    link.href = file.public_url;
-    link.download = file.original_name;
-    link.target = '_blank';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  /* cross-origin URL에서 download 속성이 무시되는 문제를 피하기 위해
+     fetch로 파일을 받아 Blob URL(same-origin)로 변환 후 다운로드 */
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(file.public_url);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = file.original_name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error('다운로드 실패:', err);
+    }
   };
 
   const handleDelete = () => {
