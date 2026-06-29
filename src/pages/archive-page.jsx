@@ -28,6 +28,41 @@ function ArchivePage() {
 
   const [selectedCategory, setSelectedCategory] = useState('전체 보기');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSelectMode, setIsSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState(new Set());
+
+  const handleToggleSelectMode = () => {
+    setIsSelectMode((prev) => !prev);
+    setSelectedIds(new Set());
+  };
+
+  const handleToggleSelect = (id) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedIds.size === filteredFiles.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredFiles.map((f) => f.id)));
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`선택된 ${selectedIds.size}개 파일을 삭제하시겠습니까?`)) return;
+    const toDelete = files.filter((f) => selectedIds.has(f.id));
+    for (const file of toDelete) {
+      await deleteFile(file);
+    }
+    setSelectedIds(new Set());
+    setIsSelectMode(false);
+  };
 
   /** 카테고리 탭 + 검색어 기준 필터링 */
   const filteredFiles = useMemo(() => {
@@ -109,6 +144,12 @@ function ArchivePage() {
           selected={selectedCategory}
           onSelect={(cat) => { setSelectedCategory(cat); }}
           counts={counts}
+          isSelectMode={isSelectMode}
+          onToggleSelectMode={handleToggleSelectMode}
+          selectedCount={selectedIds.size}
+          totalCount={filteredFiles.length}
+          onSelectAll={handleSelectAll}
+          onDeleteSelected={handleDeleteSelected}
         />
 
         {/* 결과 카운트 */}
@@ -128,6 +169,9 @@ function ArchivePage() {
           files={filteredFiles}
           isLoading={loading}
           onDelete={deleteFile}
+          isSelectMode={isSelectMode}
+          selectedIds={selectedIds}
+          onToggleSelect={handleToggleSelect}
         />
       </Container>
 

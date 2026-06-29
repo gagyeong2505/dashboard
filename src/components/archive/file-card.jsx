@@ -3,6 +3,7 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import Chip from '@mui/material/Chip';
+import Checkbox from '@mui/material/Checkbox';
 import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import FileIcon from './file-icon';
@@ -14,11 +15,14 @@ import { formatFileSize, formatDate } from '../../utils/file-utils';
  * Props:
  * @param {object} file - 파일 메타데이터 객체 [Required]
  * @param {function} onDelete - 삭제 콜백 함수 [Required]
+ * @param {boolean} isSelectMode - 파일 선택 모드 여부 [Optional, 기본값: false]
+ * @param {boolean} isSelected - 현재 선택 여부 [Optional, 기본값: false]
+ * @param {function} onToggleSelect - 선택 토글 콜백 (id 전달) [Optional]
  *
  * Example usage:
- * <FileCard file={fileObj} onDelete={handleDelete} />
+ * <FileCard file={fileObj} onDelete={handleDelete} isSelectMode={true} isSelected={false} onToggleSelect={handleToggle} />
  */
-function FileCard({ file, onDelete }) {
+function FileCard({ file, onDelete, isSelectMode = false, isSelected = false, onToggleSelect }) {
   /* cross-origin URL에서 download 속성이 무시되는 문제를 피하기 위해
      fetch로 파일을 받아 Blob URL(same-origin)로 변환 후 다운로드 */
   const handleDownload = async () => {
@@ -46,21 +50,38 @@ function FileCard({ file, onDelete }) {
 
   return (
     <Box
+      onClick={isSelectMode ? () => onToggleSelect(file.id) : undefined}
       sx={{
         display: 'flex',
         alignItems: 'center',
         gap: { xs: 1.5, md: 2 },
         p: { xs: '12px 14px', md: '14px 18px' },
         borderRadius: '12px',
-        border: '1px solid #F0F0F0',
-        backgroundColor: '#FFFFFF',
-        transition: 'box-shadow 0.15s, border-color 0.15s',
-        '&:hover': {
-          boxShadow: '0 2px 12px rgba(0,0,0,0.07)',
-          borderColor: '#E0E0E0',
-        },
+        border: `1px solid ${isSelected ? '#E63012' : '#F0F0F0'}`,
+        backgroundColor: isSelected ? '#FFF5F3' : '#FFFFFF',
+        cursor: isSelectMode ? 'pointer' : 'default',
+        transition: 'box-shadow 0.15s, border-color 0.15s, background-color 0.15s',
+        '&:hover': isSelectMode
+          ? { backgroundColor: isSelected ? '#FFF0ED' : '#FAFAFA' }
+          : { boxShadow: '0 2px 12px rgba(0,0,0,0.07)', borderColor: '#E0E0E0' },
       }}
     >
+      {/* 선택 모드 체크박스 */}
+      {isSelectMode && (
+        <Checkbox
+          checked={isSelected}
+          onChange={() => onToggleSelect(file.id)}
+          onClick={(e) => e.stopPropagation()}
+          size="small"
+          sx={{
+            p: 0,
+            flexShrink: 0,
+            color: '#DDDDDD',
+            '&.Mui-checked': { color: '#E63012' },
+          }}
+        />
+      )}
+
       {/* 파일 타입 아이콘 */}
       <FileIcon category={file.category} extension={file.extension} />
 

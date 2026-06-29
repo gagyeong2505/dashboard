@@ -11,11 +11,14 @@ import FileCard from './file-card';
  * @param {Array} files - 파일 목록 배열 [Required]
  * @param {boolean} isLoading - 로딩 상태 [Optional, 기본값: false]
  * @param {function} onDelete - 삭제 콜백 [Required]
+ * @param {boolean} isSelectMode - 파일 선택 모드 여부 [Optional, 기본값: false]
+ * @param {Set} selectedIds - 선택된 파일 id 집합 [Optional, 기본값: new Set()]
+ * @param {function} onToggleSelect - 선택 토글 콜백 [Optional]
  *
  * Example usage:
  * <FileList files={files} isLoading={loading} onDelete={handleDelete} />
  */
-function FileList({ files, isLoading = false, onDelete }) {
+function FileList({ files, isLoading = false, onDelete, isSelectMode = false, selectedIds = new Set(), onToggleSelect }) {
   if (isLoading) {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 10, gap: 2 }}>
@@ -53,7 +56,14 @@ function FileList({ files, isLoading = false, onDelete }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
       {files.map((file) => (
-        <FileCard key={file.id} file={file} onDelete={onDelete} />
+        <FileCard
+          key={file.id}
+          file={file}
+          onDelete={onDelete}
+          isSelectMode={isSelectMode}
+          isSelected={selectedIds.has(file.id)}
+          onToggleSelect={onToggleSelect}
+        />
       ))}
     </Box>
   );
