@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -18,31 +18,8 @@ import FolderOpenRoundedIcon from '@mui/icons-material/FolderOpenRounded';
  * <FileUploadArea onUpload={handleUpload} isUploading={uploading} uploadProgress={progress} />
  */
 function FileUploadArea({ onUpload, isUploading = false, uploadProgress = 0 }) {
-  const [isDragActive, setIsDragActive] = useState(false);
   const fileInputRef = useRef(null);
   const folderInputRef = useRef(null);
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    if (!isUploading) setIsDragActive(true);
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    setIsDragActive(false);
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setIsDragActive(false);
-    if (!isUploading && e.dataTransfer.files.length > 0) {
-      onUpload(e.dataTransfer.files);
-    }
-  };
-
-  const handleZoneClick = () => {
-    if (!isUploading) fileInputRef.current?.click();
-  };
 
   const handleFileChange = (e) => {
     if (e.target.files.length > 0) {
@@ -53,37 +30,8 @@ function FileUploadArea({ onUpload, isUploading = false, uploadProgress = 0 }) {
 
   return (
     <Box sx={{ mb: 4 }}>
-      {/* 드래그앤드롭 영역 */}
-      <Box
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={handleZoneClick}
-        sx={{
-          border: `2px dashed ${isDragActive ? '#E63012' : '#DDDDDD'}`,
-          borderRadius: '16px',
-          py: { xs: 5, md: 7 },
-          px: 3,
-          textAlign: 'center',
-          backgroundColor: isDragActive ? '#FFF5F3' : '#FFFFFF',
-          cursor: isUploading ? 'not-allowed' : 'pointer',
-          transition: 'all 0.2s ease',
-          '&:hover': !isUploading ? { borderColor: '#E63012', backgroundColor: '#FFF5F3' } : {},
-        }}
-      >
-        <CloudUploadRoundedIcon
-          sx={{ fontSize: { xs: 40, md: 52 }, color: isDragActive ? '#E63012' : '#CCCCCC', mb: 1.5 }}
-        />
-        <Typography sx={{ fontSize: { xs: '0.9375rem', md: '1.0625rem' }, fontWeight: 600, color: '#333', mb: 0.5 }}>
-          {isDragActive ? '여기에 파일을 놓으세요' : '파일을 드래그하거나 클릭하여 업로드'}
-        </Typography>
-        <Typography variant="caption" color="text.secondary">
-          모든 파일 형식 지원 · 여러 파일 동시 업로드 가능 · 최대 100MB
-        </Typography>
-      </Box>
-
       {/* 버튼 그룹 */}
-      <Box sx={{ display: 'flex', gap: 1.5, mt: 2, flexWrap: 'wrap' }}>
+      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
         <Button
           variant="contained"
           startIcon={<CloudUploadRoundedIcon />}
